@@ -8,20 +8,33 @@ if ($_POST)
 
     if (isset($_POST['export']))
     {
-        $msg = exportToXML($_SESSION['info']);
+        $array_info = $_SESSION['info'];
 
-        if ($msg)
+        if (empty($array_info))
         {
-            $success_message = $msg;
+            $error_message = "Submit initial data before exporting.";
         }
         else
         {
-            $error_message = "Please give write permission to www-data on " . __DIR__;
+            $msg = exportToXML($array_info);
+
+            if ($msg)
+            {
+                $success_message = $msg;
+            }
+            else
+            {
+                $error_message = "Please give write permission to www-data on " . __DIR__;
+            }
         }
     }
     else if (isset($_POST['submit']))
     {
-        saveData($name, $birthday);
+        $msg = saveData($name, $birthday);
+        if ($msg)
+        {
+            $error_message = $msg;
+        }
     }
 }
 
@@ -76,7 +89,7 @@ function saveData($name, $birthday)
     }
     else
     {
-        $error_message = "Please fill in both Name & Birthday";
+        return "Please fill in both Name & Birthday";
     }
 }
 
