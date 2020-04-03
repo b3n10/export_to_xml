@@ -66,6 +66,12 @@ table tbody td {
     display: block;
 }
 
+.validation {
+    font-size: 11px;
+    line-height: 0.1;
+    color: red;
+}
+
 /*
 .row .col > * {
     border: 1px solid #ccc;

@@ -30,10 +30,22 @@ if ($_POST)
     }
     else if (isset($_POST['submit']))
     {
-        $msg = saveData($name, $birthday);
-        if ($msg)
+        $msg = validateData($name, $birthday);
+
+        if (! empty($msg))
         {
-            $error_message = $msg;
+            if (! empty($msg["empty"]))
+            {
+                $error_message = $msg["empty"];
+            }
+            else if (! empty($msg))
+            {
+                $validation = $msg;
+            }
+        }
+        else
+        {
+            $success_message = saveData($name, $birthday);
         }
     }
 }
@@ -69,8 +81,6 @@ function exportToXML($array)
 
 function saveData($name, $birthday)
 {
-    if (!empty($name) && !empty($birthday))
-    {
         if (! isset($_SESSION['info']))
             $_SESSION['info'] = [];
 
@@ -82,17 +92,44 @@ function saveData($name, $birthday)
             ]
         );
 
-        $success_message =
-            "Successfully saved data!
+        return "Successfully saved data!
             <br>
             Submit new data or export to XML.";
+}
+
+function validateData($name, $birthday)
+{
+    if (empty($name) || empty($birthday))
+    {
+        return [
+            "empty" => "Please fill in both Name & Birthday",
+            "postName" => $name,
+            "postBirthday" => $birthday
+        ];
     }
     else
     {
-        return "Please fill in both Name & Birthday";
+        $name_match = preg_match("/[a-z]{2}/", $name);
+        $birthday_match = preg_match("/[0-9]{2}-[0-9]{2}-[0-9]{4}/", $birthday);
+
+        $errors = [];
+
+        if ($name_match == 0)
+        {
+            $errors["name"] = "Should be more than 1 character.";
+            $errors["postName"] = $name;
+            $errors["postBirthday"] = $birthday;
+        }
+        if ($birthday_match == 0)
+        {
+            $errors["birthday"] = "Format should be MM-DD-YYYY.";
+            $errors["postName"] = $name;
+            $errors["postBirthday"] = $birthday;
+        }
+
+        return $errors;
     }
 }
-
 
 // session_destroy();
 ?>
@@ -126,7 +163,13 @@ function saveData($name, $birthday)
                         <span>First name only</span>
                     </div>
                     <div class="col">
-                        <input type="text" name="name" id="name">
+                    <input type="text" name="name" id="name" value="<?php echo isset($msg["postName"]) ? $msg["postName"] : ""; ?>" >
+                    </div>
+                </div>
+                <div class="row validation">
+                    <div class="col"></div>
+                    <div class="col">
+                        <?php echo (isset($validation["name"])) ? $validation["name"] : ''; ?>
                     </div>
                 </div>
                 <div class="row">
@@ -135,7 +178,13 @@ function saveData($name, $birthday)
                         <span>mm-dd-yyyy</span>
                     </div>
                     <div class="col">
-                        <input type="text" name="birthday" id="birthday">
+                    <input type="text" name="birthday" id="birthday" value="<?php echo isset($msg["postBirthday"]) ? $msg["postBirthday"] : ""; ?>" >
+                    </div>
+                </div>
+                <div class="row validation">
+                    <div class="col"></div>
+                    <div class="col">
+                        <?php echo (isset($validation["birthday"])) ? $validation["birthday"] : ''; ?>
                     </div>
                 </div>
                 <div class="row">
